@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Get password suggestions and generate strong passwords with Password Visualizer.">
+  <title>Final Suggestions - Password Visualizer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>THANK YOU</h1>
+    <p id="message"></p>
+    <label for="generatedPassword" style="font-size: 1rem; color: #e6f0ff;">Suggested Password</label>
+    <input type="text" id="generatedPassword" readonly>
+    <div class="button-group">
+      <button id="generateBtn" class="btn btn-primary">Generate</button>
+      <button id="copyBtn" class="btn btn-success">Copy</button>
+    </div>
+    <div class="button-group">
+      <a href="enter.html" class="btn btn-primary">Enter Another Password</a>
+    </div>
+    <div class="footer">© 2025 Sidharth Team</div>
+  </div>
+  <script>
+    const msgEl = document.getElementById("message");
+    const genInput = document.getElementById("generatedPassword");
+    const generateBtn = document.getElementById("generateBtn");
+    const copyBtn = document.getElementById("copyBtn");
+
+    function entropyBits(pw) {
+      let charset = 0;
+      if (/[a-z]/.test(pw)) charset += 26;
+      if (/[A-Z]/.test(pw)) charset += 26;
+      if (/[0-9]/.test(pw)) charset += 10;
+      if (/[^a-zA-Z0-9]/.test(pw)) charset += 33;
+      return pw.length * Math.log2(charset || 1);
+    }
+
+    function updateMessage(pw) {
+      if (!pw) {
+        msgEl.textContent = "No password entered. Generate a suggested password below.";
+        setTimeout(() => window.location.href = "enter.html", 2000);
+      } else {
+        const bits = entropyBits(pw);
+        let msg = "Your password has " + bits.toFixed(2) + " bits of entropy. ";
+        msg += bits > 60 ? "Good job! 👍" : "Try the suggested password below for better security.";
+        msgEl.textContent = msg;
+      }
+    }
+
+    function generateRelatedPassword(userInput, minLength = 12) {
+      const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{};:,.<>?";
+      if (!userInput) {
+        // Fallback: generate random password if no user input
+        let pass = "";
+        for (let i = 0; i < minLength; i++) {
+          pass += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return pass;
+      }
+
+      // Use first 3-5 characters of user input (or less if shorter)
+      const baseLength = Math.min(userInput.length, Math.floor(minLength / 2));
+      let pass = userInput.slice(0, baseLength);
+
+      // Ensure at least one uppercase, number, and symbol for strength
+      const mustInclude = [
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(Math.floor(Math.random() * 26)),
+        "0123456789".charAt(Math.floor(Math.random() * 10)),
+        "!@#$%^&*()-_=+[]{};:,.<>?".charAt(Math.floor(Math.random() * 20))
+      ];
+
+      // Add random characters to reach minLength
+      while (pass.length < minLength) {
+        pass += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+
+      // Shuffle the password to mix user input with random characters
+      pass = pass.split('').sort(() => Math.random() - 0.5).join('');
+
+      // Append mustInclude characters if not already present
+      if (!/[A-Z]/.test(pass)) pass = pass.slice(0, -1) + mustInclude[0];
+      if (!/[0-9]/.test(pass)) pass = pass.slice(0, -1) + mustInclude[1];
+      if (!/[^a-zA-Z0-9]/.test(pass)) pass = pass.slice(0, -1) + mustInclude[2];
+
+      // Ensure length is exactly minLength
+      while (pass.length < minLength) {
+        pass += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      if (pass.length > minLength) {
+        pass = pass.slice(0, minLength);
+      }
+
+      // Verify entropy
+      if (entropyBits(pass) < 60) {
+        // If too weak, add more random characters
+        pass = pass.slice(0, -3) + mustInclude.join('');
+      }
+
+      return pass;
+    }
+
+    function generateAndUpdate() {
+      const userPw = sessionStorage.getItem("userPassword") || "";
+      const newPass = generateRelatedPassword(userPw, 12);
+      genInput.value = newPass;
+      updateMessage(userPw || newPass);
+    }
+
+    generateBtn.addEventListener("click", generateAndUpdate);
+
+    copyBtn.addEventListener("click", () => {
+      if (genInput.value) {
+        navigator.clipboard.writeText(genInput.value);
+        alert("Password copied to clipboard!");
+      }
+    });
+
+    const userPw = sessionStorage.getItem("userPassword");
+    updateMessage(userPw);
+    generateAndUpdate();
+    sessionStorage.removeItem("userPassword");
+  </script>
+</body>
+</html>

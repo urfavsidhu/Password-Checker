@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Estimate how long it takes to crack your password with Password Visualizer.">
+  <title>Crack Time Estimate - Password Visualizer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Estimated Time to Crack</h2>
+    <p id="result">Calculating...</p>
+    <div class="button-group">
+      <a href="strength.html" class="btn btn-secondary">Back</a>
+      <a href="result.html" class="btn btn-primary">Next</a>
+    </div>
+    <div class="footer">© 2025 Sidharth Team</div>
+  </div>
+  <script>
+    function getPassword() {
+      return sessionStorage.getItem("userPassword") || "";
+    }
+
+    function entropyBits(pw) {
+      let charset = 0;
+      if (/[a-z]/.test(pw)) charset += 26;
+      if (/[A-Z]/.test(pw)) charset += 26;
+      if (/[0-9]/.test(pw)) charset += 10;
+      if (/[^a-zA-Z0-9]/.test(pw)) charset += 33;
+      return pw.length * Math.log2(charset || 1);
+    }
+
+    function secondsToReadable(seconds) {
+      const units = [
+        { label: "year", value: 31557600 },
+        { label: "day", value: 86400 },
+        { label: "hour", value: 3600 },
+        { label: "min", value: 60 },
+        { label: "sec", value: 1 }
+      ];
+      for (let u of units) {
+        if (seconds >= u.value)
+          return (seconds / u.value).toFixed(2) + " " + u.label + (seconds / u.value >= 2 ? "s" : "");
+      }
+      return seconds.toFixed(2) + " sec";
+    }
+
+    const pw = getPassword();
+    const result = document.getElementById("result");
+
+    if (!pw) {
+      result.textContent = "No password found. Redirecting...";
+      setTimeout(() => window.location.href = "enter.html", 2000);
+    } else {
+      const bits = entropyBits(pw);
+      const combos = Math.pow(2, bits);
+      const online = combos / 100;
+      const gpu = combos / 1e9;
+      const massive = combos / 1e12;
+      result.innerHTML = `
+        <strong>Online (100/sec):</strong> ${secondsToReadable(online)}<br>
+        <strong>Offline GPU (1e9/sec):</strong> ${secondsToReadable(gpu)}<br>
+        <strong>Massive Attacker (1e12/sec):</strong> ${secondsToReadable(massive)}
+      `;
+    }
+  </script>
+</body>
+</html>

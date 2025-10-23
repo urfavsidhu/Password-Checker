@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Enter a password to test its strength with Password Visualizer.">
+  <title>Enter Password - Password Visualizer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Enter a Password</h2>
+    <p style="font-size: 0.9rem; color: #bfcfe8;">For testing only. Do not use real passwords.</p>
+    <label for="pw" style="font-size: 1rem; color: #e6f0ff;">Enter your password</label>
+    <input type="password" id="pw" placeholder="Type a password to test">
+    <div class="button-group">
+      <a href="index.html" class="btn btn-secondary">Back</a>
+      <button onclick="savePassword()" class="btn btn-primary">Next</button>
+    </div>
+    <div class="footer">© 2025 Sidharth Team</div>
+  </div>
+  <script>
+    function savePassword() {
+      try {
+        const pw = document.getElementById("pw").value.trim();
+        if (!pw) {
+          alert("Please enter a password first!");
+          return;
+        }
+        sessionStorage.setItem("userPassword", pw);
+        alert("Saved: " + pw + ", redirecting to cracktime.html");
+        window.location.href = "cracktime.html";
+      } catch (e) {
+        alert("Error: " + e.message);
+        console.error("Save error:", e);
+      }
+    }
+  </script>
+</body>
+</html>
