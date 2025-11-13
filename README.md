@@ -59,4 +59,4 @@ Then it dynamically updates the **strength meter** and color indicators to show 
 
 Example:
 ```markdown
-![App Preview](./screenshot.png)
+![Website Preview](https://urfavsidhu.github.io/Password-Checker/index.html)
